@@ -17,7 +17,7 @@ def data_generator(m):
             rad = random.random()
             x.append(1 - x[-1]) if rad < 0.25 else x.append(x[-1])
         for _ in range(15, 21):
-            rad = random.random
+            rad = random.random()
             x.append(1) if rad < 0.5 else x.append(0)
         data_x.append(x)
         if x[0] == 0:
@@ -81,13 +81,13 @@ def split_data(data_x, data_y, key):
     return data_x1, data_x2, data_y1, data_y2
 
 
-def build_tree(data_x, data_y, label_list):
+def build_tree(data_x, data_y, label_list, depth, s):
     if len(data_x) == 0:
         return None
     elif sum(data_y) == 0 or sum(data_y) == len(data_y):
         leaf = tree_node(-1, label=data_y[0])
         return leaf
-    elif len(data_x[0]) == 0:
+    elif len(data_x[0]) == 0 or depth == 0 or len(data_y) <= s:
         lbl = 1 if 2 * sum(data_y) > len(data_y) else 0
         leaf = tree_node(-1, label=lbl)
         return leaf
@@ -96,8 +96,8 @@ def build_tree(data_x, data_y, label_list):
         data_x1, data_x2, data_y1, data_y2 = split_data(data_x, data_y, key)
         node = tree_node(label_list[key])
         new_label_list = copy.deepcopy(label_list[:key] + label_list[key + 1:])
-        left_node = build_tree(data_x1, data_y1, new_label_list)
-        right_node = build_tree(data_x2, data_y2, new_label_list)
+        left_node = build_tree(data_x1, data_y1, new_label_list, depth - 1)
+        right_node = build_tree(data_x2, data_y2, new_label_list, depth - 1)
         node.left = left_node
         node.right = right_node
         return node
@@ -125,12 +125,14 @@ def cal_acc(real_label, predicted_label):
 
 
 if __name__ == '__main__':
-    m = 30
+    m = 8000
+    d = 3
+    s = 5
     data_x, data_y = data_generator(m)
     label_list = [i for i in range(21)]
     print(data_x)
     print(data_y)
-    decision_tree = build_tree(data_x, data_y, label_list)
+    decision_tree = build_tree(data_x, data_y, label_list, d, s)
     predict_y = test_tree(data_x, decision_tree)
     print(predict_y)
     createPlot(decision_tree)
