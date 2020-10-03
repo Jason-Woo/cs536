@@ -65,30 +65,9 @@ def createPlot(inTree):
     fig.clf()
     axprops = dict(xticks=[], yticks=[])
     createPlot.ax1 = plt.subplot(111, frameon=False, **axprops)  # no ticks
-    # createPlot.ax1 = plt.subplot(111, frameon=False) #ticks for demo puropses
     plotTree.totalW = float(getNumLeafs(inTree))
     plotTree.totalD = float(getTreeDepth(inTree, 1))
     plotTree.xOff = -0.5 / plotTree.totalW
     plotTree.yOff = 1
     plotTree(inTree, (0.5, 1), '')
     plt.show()
-
-
-# class tree_node():
-#     def __init__(self, key, left=None, right=None, label=-1):
-#         self.key = key
-#         self.left = left
-#         self.right = right
-#         self.label = label
-#
-# head = tree_node(1)
-# l1 = tree_node(-1,label=1)
-# r1 = tree_node(2)
-# r21 = tree_node(-1, label=1)
-# r22 = tree_node(-1, label=0)
-# head.left = l1
-# head.right = r1
-# r1.left = r21
-# r1.right = r22
-#
-# createPlot(head)
