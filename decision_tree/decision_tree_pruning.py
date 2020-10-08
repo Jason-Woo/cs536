@@ -2,6 +2,7 @@ import random
 from math import log
 import copy
 import matplotlib.pyplot as plt
+import numpy as np
 
 from tree_visualization import createPlot
 
@@ -88,6 +89,10 @@ def find_key_id3(data_x, data_y):
         if info_gain > max_gain:
             max_gain = info_gain
             max_key = i
+    print(g)
+    if max_key == 2:
+        print(data_x)
+        print(data_y)
     return max_key
 
 
@@ -237,17 +242,17 @@ def num_irrelevant(tree):
 
 
 if __name__ == '__main__':
-    test_id = 2
+    test_id = 0
     if test_id == 0:
         m = 1000
         d = -1
         s = -1
         # data_x, data_y = data_generator(m)
-        data_x = [[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1], [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1], [1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1], [1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0], [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0]]
-        data_y = [0, 1, 1, 0, 1, 1, 1, 1, 1, 1]
+        data_x = np.transpose(np.load('x.npy')).tolist()
+        data_y = np.load('y.npy').tolist()
         label_list = [i for i in range(21)]
-        print(data_x)
-        print(data_y)
+        # print(data_x)
+        # print(data_y)
 
         decision_tree = build_tree(data_x, data_y, label_list, d, s)
         predict_y = test_tree(data_x, decision_tree)
