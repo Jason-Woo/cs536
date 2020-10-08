@@ -319,7 +319,7 @@ def cal_acc(real_label, predicted_label):
 
 
 if __name__ == '__main__':
-    test_id = 2
+    test_id = 0
     if test_id == 0:
         m, k = 30, 4
         method = 'id3'

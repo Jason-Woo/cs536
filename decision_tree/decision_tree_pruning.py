@@ -1,6 +1,8 @@
 import random
 from math import log
 import copy
+import matplotlib.pyplot as plt
+
 from tree_visualization import createPlot
 
 
@@ -13,7 +15,7 @@ def data_generator(m):
             size of the data
         ----------
         Return
-        data_x: list of size m*k
+        data_x: list of size m*20
             feature values of data
         data_y: list of size m
             the label of each data
@@ -89,10 +91,10 @@ def find_key_id3(data_x, data_y):
 
 class tree_node():
     def __init__(self, key, left=None, right=None, label=-1):
-        self.key = key
+        self.key = key  # For leaf, key = -1
         self.left = left
         self.right = right
-        self.label = label
+        self.label = label  # For tree node, label = -1
 
 
 def split_data(data_x, data_y, key):
@@ -122,7 +124,7 @@ def split_data(data_x, data_y, key):
     return data_x1, data_x2, data_y1, data_y2
 
 
-def build_tree(data_x, data_y, label_list, depth):
+def build_tree(data_x, data_y, label_list, depth, threshold):
     """
         split data set into two parts based on the value of given feature
         ----------
@@ -134,16 +136,19 @@ def build_tree(data_x, data_y, label_list, depth):
         label list: list
             the name of features of data_x
         depth: integer
-            method we use to build the tree, choose from: id3, c4.5 and cart
+            The maximum depth we allowed for the tree
+        threshold: integer
+            The minimum size of data we allowed for each node
         ----------
         Return
         node: tree_node object
             the decision tree build with the training data
     """
-    if sum(data_y) == 0 or sum(data_y) == len(data_y):
+    if sum(data_y) == 0 or sum(data_y) == len(data_y):   # All data in the node have same label, then it is a leaf node
         leaf = tree_node(-1, label=data_y[0])
         return leaf
-    elif len(data_x[0]) == 0 or depth == 0 or len(data_y) <= s:
+    elif len(data_x[0]) == 0 or depth == 0 or len(data_y) <= threshold:
+        # All feature have been use, or we are reaching maximal depth or minimal size of data, then it is a leaf node
         lbl = 1 if 2 * sum(data_y) > len(data_y) else 0
         leaf = tree_node(-1, label=lbl)
         return leaf
@@ -152,8 +157,8 @@ def build_tree(data_x, data_y, label_list, depth):
         data_x1, data_x2, data_y1, data_y2 = split_data(data_x, data_y, key)
         node = tree_node(label_list[key])
         new_label_list = copy.deepcopy(label_list[:key] + label_list[key + 1:])
-        left_node = build_tree(data_x1, data_y1, new_label_list, depth - 1)
-        right_node = build_tree(data_x2, data_y2, new_label_list, depth - 1)
+        left_node = build_tree(data_x1, data_y1, new_label_list, depth - 1, threshold)
+        right_node = build_tree(data_x2, data_y2, new_label_list, depth - 1, threshold)
         node.left = left_node
         node.right = right_node
         return node
@@ -206,15 +211,100 @@ def cal_acc(real_label, predicted_label):
     return err
 
 
+def num_irrelevant(tree):
+    """
+        Calculate number of irrelevant variables in the tree
+        ----------
+        Parameters
+        tree: tree_node object
+            decision tree
+        ----------
+        Return
+        cnt: integer
+            the number of irrelevant variables in the tree
+    """
+    cnt = 0
+    if tree.left.key != -1:
+        cnt += num_irrelevant(tree.left)
+    if tree.right.key != -1:
+        cnt += num_irrelevant(tree.right)
+    irr_id = [i for i in range(15, 21)]
+    if tree.key in irr_id:
+        cnt += 1
+    return cnt
+
+
 if __name__ == '__main__':
-    m = 8000
-    d = 3
-    s = 5
-    data_x, data_y = data_generator(m)
-    label_list = [i for i in range(21)]
-    print(data_x)
-    print(data_y)
-    decision_tree = build_tree(data_x, data_y, label_list, d)
-    predict_y = test_tree(data_x, decision_tree)
-    print(predict_y)
-    createPlot(decision_tree)
+    test_id = 0
+    if test_id == 0:
+        m = 10000
+        d = -1
+        s = -1
+        data_x, data_y = data_generator(m)
+        label_list = [i for i in range(21)]
+        print(data_x)
+        print(data_y)
+        decision_tree = build_tree(data_x, data_y, label_list, d, s)
+        predict_y = test_tree(data_x, decision_tree)
+        print(predict_y)
+        createPlot(decision_tree)
+        print(cal_acc(data_y, predict_y))
+    elif test_id == 1:
+        num_irr = []
+        m = [j for j in range(10, 1001)]
+        for tmp_m in m:
+            irr_cnt = 0
+            for i in range(100):
+                d = -1
+                s = -1
+                data_x, data_y = data_generator(tmp_m)
+                label_list = [i for i in range(21)]
+                decision_tree = build_tree(data_x, data_y, label_list, d, s)
+                irr_cnt += num_irrelevant(decision_tree)
+            irr_cnt /= 100
+            num_irr.append(irr_cnt)
+            print(irr_cnt)
+        plt.plot(m, num_irr)
+        plt.show()
+    elif test_id == 2:
+        m = 10000
+        d = [i for i in range(0, 21)]
+        s = -1
+        err_train, err_test = [], []
+        for tmp_d in d:
+            print(tmp_d)
+            tmp_err_train, tmp_err_test = 0, 0
+            data_x, data_y = data_generator(m)
+            train_x, train_y = data_x[:8000], data_y[:8000]
+            test_x, test_y = data_x[8000:], data_y[8000:]
+            label_list = [i for i in range(21)]
+            decision_tree = build_tree(train_x, train_y, label_list, tmp_d, s)
+            predcit_train = test_tree(train_x, decision_tree)
+            predcit_test = test_tree(test_x, decision_tree)
+            err_train.append(cal_acc(train_y, predcit_train))
+            err_test.append(cal_acc(test_y, predcit_test))
+        plt.plot(d, err_train, color='black', label='train')
+        plt.plot(d, err_test, color='blue', label='test')
+        plt.legend()
+        plt.show()
+    elif test_id == 3:
+        m = 10000
+        d = -1
+        s = [i for i in range(1, 4000, 50)]
+        err_train, err_test = [], []
+        for tmp_s in s:
+            print(tmp_s)
+            tmp_err_train, tmp_err_test = 0, 0
+            data_x, data_y = data_generator(m)
+            train_x, train_y = data_x[:8000], data_y[:8000]
+            test_x, test_y = data_x[8000:], data_y[8000:]
+            label_list = [i for i in range(21)]
+            decision_tree = build_tree(train_x, train_y, label_list, d, tmp_s)
+            predcit_train = test_tree(train_x, decision_tree)
+            predcit_test = test_tree(test_x, decision_tree)
+            err_train.append(cal_acc(train_y, predcit_train))
+            err_test.append(cal_acc(test_y, predcit_test))
+        plt.plot(s, err_train, color='black', label='train')
+        plt.plot(s, err_test, color='blue', label='test')
+        plt.legend()
+        plt.show()
