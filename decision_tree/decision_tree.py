@@ -60,7 +60,7 @@ def find_key_id3(data_x, data_y):
     """
     p_1 = sum(data_y) / len(data_y)
     p_0 = 1 - p_1
-    entropy_base = -1 * (p_0 * log(p_0) + p_1 * log(p_1))  # Entropy of the label
+    entropy_base = -1 * (p_0 * log(p_0, 2) + p_1 * log(p_1, 2))  # Entropy of the label
     max_gain, max_key = 0, -1  # store maximum info-gain and index of corresponding feature
     for i in range(len(data_x[0])):
         p_0_0, p_0_1, p_1_0, p_1_1 = 0, 0, 0, 0
@@ -78,13 +78,13 @@ def find_key_id3(data_x, data_y):
         if p_0_0 == 0 or p_0_1 == 0:
             entropy_new1 = 0  # entropy of subset feature value = 0
         else:
-            entropy_new1 = -1 * (p_0_0 / (p_0_0 + p_0_1) * log(p_0_0 / (p_0_0 + p_0_1)) + p_0_1 / (p_0_0 + p_0_1) * log(
-                p_0_1 / (p_0_0 + p_0_1)))
+            entropy_new1 = -1 * (p_0_0 / (p_0_0 + p_0_1) * log(p_0_0 / (p_0_0 + p_0_1), 2) + p_0_1 / (p_0_0 + p_0_1) * log(
+                p_0_1 / (p_0_0 + p_0_1), 2))
         if p_1_0 == 0 or p_1_1 == 0:
             entropy_new2 = 0  # entropy of subset feature value = 1
         else:
-            entropy_new2 = -1 * (p_1_0 / (p_1_0 + p_1_1) * log(p_1_0 / (p_1_0 + p_1_1)) + p_1_1 / (p_1_0 + p_1_1) * log(
-                p_1_1 / (p_1_0 + p_1_1)))
+            entropy_new2 = -1 * (p_1_0 / (p_1_0 + p_1_1) * log(p_1_0 / (p_1_0 + p_1_1), 2) + p_1_1 / (p_1_0 + p_1_1) * log(
+                p_1_1 / (p_1_0 + p_1_1), 2))
         info_gain = entropy_base - (
                     (p_0_1 + p_0_0) / len(data_x) * entropy_new1 + (p_1_1 + p_1_0) / len(data_x) * entropy_new2)
         if info_gain > max_gain:
@@ -109,7 +109,7 @@ def find_key_c45(data_x, data_y):
     """
     p_1 = sum(data_y) / len(data_y)
     p_0 = 1 - p_1
-    entropy_base = -1 * (p_0 * log(p_0) + p_1 * log(p_1))  # Entropy of the label
+    entropy_base = -1 * (p_0 * log(p_0, 2) + p_1 * log(p_1, 2))  # Entropy of the label
     max_gain, max_key = 0, -1  # store maximum info-gain and index of corresponding feature
     for i in range(len(data_x[0])):
         p_0_0, p_0_1, p_1_0, p_1_1 = 0, 0, 0, 0
@@ -127,20 +127,20 @@ def find_key_c45(data_x, data_y):
         if p_0_0 == 0 or p_0_1 == 0:
             entropy_new1 = 0  # entropy of subset feature value = 0
         else:
-            entropy_new1 = -1 * (p_0_0 / (p_0_0 + p_0_1) * log(p_0_0 / (p_0_0 + p_0_1)) + p_0_1 / (p_0_0 + p_0_1) * log(
-                p_0_1 / (p_0_0 + p_0_1)))
+            entropy_new1 = -1 * (p_0_0 / (p_0_0 + p_0_1) * log(p_0_0 / (p_0_0 + p_0_1), 2) + p_0_1 / (p_0_0 + p_0_1) * log(
+                p_0_1 / (p_0_0 + p_0_1), 2))
         if p_1_0 == 0 or p_1_1 == 0:
             entropy_new2 = 0  # entropy of subset feature value = 1
         else:
-            entropy_new2 = -1 * (p_1_0 / (p_1_0 + p_1_1) * log(p_1_0 / (p_1_0 + p_1_1)) + p_1_1 / (p_1_0 + p_1_1) * log(
-                p_1_1 / (p_1_0 + p_1_1)))
+            entropy_new2 = -1 * (p_1_0 / (p_1_0 + p_1_1) * log(p_1_0 / (p_1_0 + p_1_1), 2) + p_1_1 / (p_1_0 + p_1_1) * log(
+                p_1_1 / (p_1_0 + p_1_1), 2))
         info_gain = entropy_base - (
                     (p_0_1 + p_0_0) / len(data_x) * entropy_new1 + (p_1_1 + p_1_0) / len(data_x) * entropy_new2)
         if p_0_1 + p_0_0 == 0 or p_1_1 + p_1_0 == 0:
             split_info = 1
         else:
-            split_info = -1 * ((p_0_1 + p_0_0) / len(data_x) * log((p_0_1 + p_0_0) / len(data_x)) + (p_1_1 + p_1_0) / len(
-            data_x) * log((p_1_1 + p_1_0) / len(data_x)))
+            split_info = -1 * ((p_0_1 + p_0_0) / len(data_x) * log((p_0_1 + p_0_0) / len(data_x), 2) + (p_1_1 + p_1_0) / len(
+            data_x) * log((p_1_1 + p_1_0) / len(data_x), 2))
         gain_ratio = info_gain / split_info  # info-gain ratio
         if gain_ratio > max_gain:
             max_gain = gain_ratio

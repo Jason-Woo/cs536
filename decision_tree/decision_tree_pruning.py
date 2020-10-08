@@ -57,9 +57,10 @@ def find_key_id3(data_x, data_y):
         max_key: integer
             the index of feature with largest info-gain of data_x
     """
+    g = []
     p_1 = sum(data_y) / len(data_y)
-    p_0 = 1 - p_1
-    entropy_base = -1 * (p_0 * log(p_0) + p_1 * log(p_1))
+    p_0 = (len(data_y)-sum(data_y)) / len(data_y)
+    entropy_base = -1 * (p_0 * log(p_0, 2) + p_1 * log(p_1, 2))
     max_gain, max_key = 0, -1
     for i in range(len(data_x[0])):
         p_0_0, p_0_1, p_1_0, p_1_1 = 0, 0, 0, 0
@@ -77,12 +78,13 @@ def find_key_id3(data_x, data_y):
         if p_0_0 == 0 or p_0_1 == 0:
             entropy_new1 = 0
         else:
-            entropy_new1 = -1 * (p_0_0 / (p_0_0 + p_0_1) * log(p_0_0 / (p_0_0 + p_0_1)) + p_0_1 / (p_0_0 + p_0_1) * log(p_0_1 / (p_0_0 + p_0_1)))
+            entropy_new1 = -1 * (p_0_0 / (p_0_0 + p_0_1) * log(p_0_0 / (p_0_0 + p_0_1), 2) + p_0_1 / (p_0_0 + p_0_1) * log(p_0_1 / (p_0_0 + p_0_1), 2))
         if p_1_0 == 0 or p_1_1 == 0:
             entropy_new2 = 0
         else:
-            entropy_new2 = -1 * (p_1_0 / (p_1_0 + p_1_1) * log(p_1_0 / (p_1_0 + p_1_1)) + p_1_1 / (p_1_0 + p_1_1) * log(p_1_1 / (p_1_0 + p_1_1)))
+            entropy_new2 = -1 * (p_1_0 / (p_1_0 + p_1_1) * log(p_1_0 / (p_1_0 + p_1_1), 2) + p_1_1 / (p_1_0 + p_1_1) * log(p_1_1 / (p_1_0 + p_1_1), 2))
         info_gain = entropy_base - ((p_0_1 + p_0_0) / len(data_x) * entropy_new1 + (p_1_1 + p_1_0) / len(data_x) * entropy_new2)
+        g.append(info_gain)
         if info_gain > max_gain:
             max_gain = info_gain
             max_key = i
@@ -235,15 +237,18 @@ def num_irrelevant(tree):
 
 
 if __name__ == '__main__':
-    test_id = 0
+    test_id = 2
     if test_id == 0:
-        m = 10000
+        m = 1000
         d = -1
         s = -1
-        data_x, data_y = data_generator(m)
+        # data_x, data_y = data_generator(m)
+        data_x = [[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1], [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1], [1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1], [1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0], [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0]]
+        data_y = [0, 1, 1, 0, 1, 1, 1, 1, 1, 1]
         label_list = [i for i in range(21)]
         print(data_x)
         print(data_y)
+
         decision_tree = build_tree(data_x, data_y, label_list, d, s)
         predict_y = test_tree(data_x, decision_tree)
         print(predict_y)
@@ -251,7 +256,7 @@ if __name__ == '__main__':
         print(cal_acc(data_y, predict_y))
     elif test_id == 1:
         num_irr = []
-        m = [j for j in range(10, 1001)]
+        m = [j for j in range(10, 1001, 10)]
         for tmp_m in m:
             irr_cnt = 0
             for i in range(100):
