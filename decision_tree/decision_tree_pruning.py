@@ -58,7 +58,6 @@ def find_key_id3(data_x, data_y):
         max_key: integer
             the index of feature with largest info-gain of data_x
     """
-    g = []
     p_1 = sum(data_y) / len(data_y)
     p_0 = (len(data_y)-sum(data_y)) / len(data_y)
     entropy_base = -1 * (p_0 * log(p_0, 2) + p_1 * log(p_1, 2))
@@ -85,14 +84,9 @@ def find_key_id3(data_x, data_y):
         else:
             entropy_new2 = -1 * (p_1_0 / (p_1_0 + p_1_1) * log(p_1_0 / (p_1_0 + p_1_1), 2) + p_1_1 / (p_1_0 + p_1_1) * log(p_1_1 / (p_1_0 + p_1_1), 2))
         info_gain = entropy_base - ((p_0_1 + p_0_0) / len(data_x) * entropy_new1 + (p_1_1 + p_1_0) / len(data_x) * entropy_new2)
-        g.append(info_gain)
         if info_gain > max_gain:
             max_gain = info_gain
             max_key = i
-    print(g)
-    if max_key == 2:
-        print(data_x)
-        print(data_y)
     return max_key
 
 
@@ -242,19 +236,16 @@ def num_irrelevant(tree):
 
 
 if __name__ == '__main__':
-    test_id = 0
+    test_id = 5
     if test_id == 0:
         m = 1000
         d = -1
         s = -1
-        # data_x, data_y = data_generator(m)
-        data_x = np.transpose(np.load('x.npy')).tolist()
-        data_y = np.load('y.npy').tolist()
+        data_x, data_y = data_generator(m)
         label_list = [i for i in range(21)]
-        # print(data_x)
-        # print(data_y)
 
         decision_tree = build_tree(data_x, data_y, label_list, d, s)
+        print(num_irrelevant(decision_tree))
         predict_y = test_tree(data_x, decision_tree)
         print(predict_y)
         createPlot(decision_tree)
@@ -317,4 +308,38 @@ if __name__ == '__main__':
         plt.plot(s, err_train, color='black', label='train')
         plt.plot(s, err_test, color='blue', label='test')
         plt.legend()
+        plt.show()
+    elif test_id == 4:
+        num_irr = []
+        m = [j for j in range(10, 1001, 10)]
+        for tmp_m in m:
+            irr_cnt = 0
+            for i in range(100):
+                d = 9
+                s = -1
+                data_x, data_y = data_generator(tmp_m)
+                label_list = [i for i in range(21)]
+                decision_tree = build_tree(data_x, data_y, label_list, d, s)
+                irr_cnt += num_irrelevant(decision_tree)
+            irr_cnt /= 100
+            num_irr.append(irr_cnt)
+            print(irr_cnt)
+        plt.plot(m, num_irr)
+        plt.show()
+    elif test_id == 5:
+        num_irr = []
+        m = [j for j in range(10, 1001, 10)]
+        for tmp_m in m:
+            irr_cnt = 0
+            for i in range(100):
+                d = -1
+                s = 500
+                data_x, data_y = data_generator(tmp_m)
+                label_list = [i for i in range(21)]
+                decision_tree = build_tree(data_x, data_y, label_list, d, s)
+                irr_cnt += num_irrelevant(decision_tree)
+            irr_cnt /= 100
+            num_irr.append(irr_cnt)
+            print(irr_cnt)
+        plt.plot(m, num_irr)
         plt.show()
