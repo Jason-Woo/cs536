@@ -14,7 +14,7 @@ def data_generator(m):
             size of the data
         ----------
         Return
-        data_x: list of size m*20
+        data_x: list of size m*15
             feature values of data
         data_y: list of size m
             the label of each data
@@ -27,17 +27,17 @@ def data_generator(m):
         rad = random.random()
         x.append(1) if rad < 0.5 else x.append(0)
 
-        for _ in range(1, 15):
+        for _ in range(1, 11):
             rad = random.random()
             x.append(1 - x[-1]) if rad < 0.25 else x.append(x[-1])
-        for _ in range(15, 21):
+        for _ in range(11, 16):
             rad = random.random()
             x.append(1) if rad < 0.5 else x.append(0)
         data_x.append(x)
         if x[0] == 0:
-            y = 1 if sum(x[1:8]) > 3 else 0
+            y = 1 if sum(x[1:6]) > 3 else 0
         elif x[0] == 1:
-            y = 1 if sum(x[8:15]) > 3 else 0
+            y = 1 if sum(x[6:11]) > 3 else 0
         data_y.append(y)
     return data_x, data_y
 
@@ -227,7 +227,7 @@ def num_irrelevant(tree):
         cnt += num_irrelevant(tree.left)
     if tree.right.key != -1:
         cnt += num_irrelevant(tree.right)
-    irr_id = [i for i in range(15, 21)]
+    irr_id = [i for i in range(11, 16)]
     if tree.key in irr_id:
         cnt += 1
     return cnt
@@ -237,7 +237,7 @@ if __name__ == '__main__':
     test_id = 5
     if test_id == 0:
         err = []
-        m = [j for j in range(10, 1001, 10)]
+        m = [j for j in range(10, 10001, 50)]
         for tmp_m in m:
             print(tmp_m)
             tmp_err = 0
@@ -245,7 +245,7 @@ if __name__ == '__main__':
                 d = -1
                 s = -1
                 data_x, data_y = data_generator(tmp_m)
-                label_list = [i for i in range(21)]
+                label_list = [i for i in range(16)]
                 decision_tree = build_tree(data_x, data_y, label_list, d, s)
                 predict_label = test_tree(data_x, decision_tree)
                 tmp_err += cal_acc(data_y, predict_label)
@@ -254,24 +254,24 @@ if __name__ == '__main__':
         plt.show()
     elif test_id == 1:
         num_irr = []
-        m = [j for j in range(10, 1001, 10)]
+        m = [j for j in range(10, 10001, 50)]
         for tmp_m in m:
             irr_cnt = 0
-            for i in range(100):
+            for i in range(10):
                 d = -1
                 s = -1
                 data_x, data_y = data_generator(tmp_m)
-                label_list = [i for i in range(21)]
+                label_list = [i for i in range(16)]
                 decision_tree = build_tree(data_x, data_y, label_list, d, s)
                 irr_cnt += num_irrelevant(decision_tree)
-            irr_cnt /= 100
+            irr_cnt /= 10
             num_irr.append(irr_cnt)
             print(irr_cnt)
         plt.plot(m, num_irr)
         plt.show()
     elif test_id == 2:
         m = 10000
-        d = [i for i in range(0, 21)]
+        d = [i for i in range(0, 16)]
         s = -1
         err_train, err_test = [], []
         for tmp_d in d:
@@ -280,7 +280,7 @@ if __name__ == '__main__':
             data_x, data_y = data_generator(m)
             train_x, train_y = data_x[:8000], data_y[:8000]
             test_x, test_y = data_x[8000:], data_y[8000:]
-            label_list = [i for i in range(21)]
+            label_list = [i for i in range(16)]
             decision_tree = build_tree(train_x, train_y, label_list, tmp_d, s)
             predcit_train = test_tree(train_x, decision_tree)
             predcit_test = test_tree(test_x, decision_tree)
@@ -301,7 +301,7 @@ if __name__ == '__main__':
             data_x, data_y = data_generator(m)
             train_x, train_y = data_x[:8000], data_y[:8000]
             test_x, test_y = data_x[8000:], data_y[8000:]
-            label_list = [i for i in range(21)]
+            label_list = [i for i in range(16)]
             decision_tree = build_tree(train_x, train_y, label_list, d, tmp_s)
             predcit_train = test_tree(train_x, decision_tree)
             predcit_test = test_tree(test_x, decision_tree)
@@ -313,24 +313,24 @@ if __name__ == '__main__':
         plt.show()
     elif test_id == 4:
         num_irr = []
-        m = [j for j in range(10, 1001, 10)]
+        m = [j for j in range(50, 10001, 50)]
         for tmp_m in m:
             print(tmp_m)
             irr_cnt = 0
-            for i in range(100):
-                d = 9
+            for i in range(10):
+                d = 8
                 s = -1
                 data_x, data_y = data_generator(tmp_m)
-                label_list = [i for i in range(21)]
+                label_list = [i for i in range(16)]
                 decision_tree = build_tree(data_x, data_y, label_list, d, s)
                 irr_cnt += num_irrelevant(decision_tree)
-            irr_cnt /= 100
+            irr_cnt /= 10
             num_irr.append(irr_cnt)
         plt.plot(m, num_irr)
         plt.show()
     elif test_id == 5:
         num_irr = []
-        m = [j for j in range(600, 5001, 100)]
+        m = [j for j in range(600, 10001, 50)]
         for tmp_m in m:
             print(tmp_m)
             irr_cnt = 0
@@ -338,7 +338,7 @@ if __name__ == '__main__':
                 d = -1
                 s = 500
                 data_x, data_y = data_generator(tmp_m)
-                label_list = [i for i in range(21)]
+                label_list = [i for i in range(16)]
                 decision_tree = build_tree(data_x, data_y, label_list, d, s)
                 irr_cnt += num_irrelevant(decision_tree)
             irr_cnt /= 10
