@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 def data_generate(k, m, epsilon):
     data_x, data_y = [], []
@@ -17,11 +18,12 @@ def data_generate(k, m, epsilon):
 
 
 def perceptron(data_x, data_y):
-    weight = np.zeros(data_x.shape[1])
+    # weight = np.zeros(data_x.shape[1])
+    weight = np.random.rand(data_x.shape[1])
     bias = 0
     step_cnt = 0
     while step_cnt <= 10000:
-        err_list = []
+        err_list = []  # misclassified data
         for i in range(len(data_x)):
             y_predict = np.dot(weight, data_x[i]) + bias
             label_predict = 1 if y_predict > 0 else -1
@@ -40,8 +42,11 @@ def perceptron(data_x, data_y):
 def compute_error(weight, bias):
     k = len(weight)
     idea_weight = np.zeros(k)
-    idea_weight[-1] = 1
+    idea_weight[-1] = 1  # all is 0 except last
     idea_bias = 0
+    scale = math.sqrt(sum(weight ** 2) + bias ** 2)  # Scaling here
+    weight /= scale
+    bias /= scale
     err = np.linalg.norm((weight - idea_weight), 2) ** 2 + (idea_bias - bias) ** 2
     return err
 
