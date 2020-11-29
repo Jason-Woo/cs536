@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 
 def data_generate(m):
@@ -77,42 +78,47 @@ def ridge_regression(x, y, gradient_descent=False, lmb=0.1):
         return np.linalg.inv(xtx + lmb * np.identity(21)).dot(x.transpose()).dot(y)
 
 
-def lasso_regression(x, y, lmb=3000):
+def lasso_regression(x, y, lmb=0.01):
     m = x.shape[0]
-    w = np.zeros(21)
+    w = np.ones(21)
     iter_cnt = 0
     err_prev = 9999999
-    threshold = 1e-7
+    threshold = 1e-3
 
     while True:
         y_predict = x.dot(w)
         err = np.sum((y - y_predict) ** 2) / m + lmb * np.linalg.norm(w, 1)
-        print(err_prev, err)
         if err_prev - err < threshold:
             return w
         err_prev = err
-        if iter_cnt % 1 == 0:
+        if iter_cnt % 10 == 0:
             print(iter_cnt, err_prev)
         for k in range(21):
-            w_k = np.transpose(x[:, k]).dot(y - x.dot(w) + w[k] * x[:, k])
-            if w_k < -1 * lmb / 2:
-                w_k = w_k + lmb / 2
+            z_k = sum(np.transpose(x[:, k]) * x[:, k])
+            w_k = 0
+            for i in range(m):
+                w_k += x[i, k] * (y[i] - sum(x[i, j] * w[j] for j in range(21) if j != k))
+            if w_k < -lmb / 2:
+                w_k = (w_k + lmb / 2) / z_k
             elif w_k > lmb / 2:
-                w_k = w_k - lmb / 2
+                w_k = (w_k - lmb / 2) / z_k
             else:
                 w_k = 0
             w[k] = w_k
+        iter_cnt += 1
 
 
 def estimate_error(w, data_size):
     x, y = data_generate(data_size)
+    x = x / np.linalg.norm(x, axis=0)
+    y = y / np.linalg.norm(y, axis=0)
     y_predict = x.dot(w)
     mse = np.square(np.subtract(y, y_predict)).mean()
     return mse
 
 
 if __name__ == '__main__':
-    test_case = 1
+    test_case = 3
     if test_case == 0:
         X, Y = data_generate(1000)
         w = naive_regression(X, Y, True)
@@ -126,7 +132,7 @@ if __name__ == '__main__':
             for tmp_l in l:
                 X, Y = data_generate(1000)
                 w = ridge_regression(X, Y, True, tmp_l)
-                err.append(estimate_error(w))
+                err.append(estimate_error(w, 10000))
             plt.plot(l, err)
             plt.show()
         else:
@@ -134,6 +140,31 @@ if __name__ == '__main__':
             w = ridge_regression(X, Y, True, 0.005)
             print(w)
     elif test_case == 2:
-        X, Y = data_generate(1000)
-        w = lasso_regression(X, Y)
-        print(w)
+        l = np.linspace(0, 100, 100)
+        num_eliminate = []
+        for tmp_l in l:
+            X, Y = data_generate(1000)
+            w = lasso_regression(X, Y, tmp_l)
+            tmp_eliminate = 0
+            for tmp_w in w:
+                if tmp_w == 0:
+                    tmp_eliminate += 1
+            num_eliminate.append(tmp_eliminate)
+        plt.plot(l, num_eliminate)
+        plt.show()
+    elif test_case == 3:
+        iter_lmb = False
+        if iter_lmb:
+            l = np.linspace(0, 100, 100)
+            err = []
+            for tmp_l in l:
+                X, Y = data_generate(1000)
+                w = lasso_regression(X, Y, tmp_l)
+                err.append(estimate_error(w, 10000))
+            plt.plot(l, err)
+            plt.show()
+        else:
+            X, Y = data_generate(1000)
+            w = lasso_regression(X, Y, 0.1)
+            print(w)
+
