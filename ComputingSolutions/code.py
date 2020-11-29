@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import math
 
 
 def data_generate(m):
@@ -80,10 +79,10 @@ def ridge_regression(x, y, gradient_descent=False, lmb=0.1):
 
 def lasso_regression(x, y, lmb=0.01):
     m = x.shape[0]
-    w = np.ones(21)
+    w = np.zeros(21)
     iter_cnt = 0
     err_prev = 9999999
-    threshold = 1e-3
+    threshold = 1e-7
 
     while True:
         y_predict = x.dot(w)
@@ -94,7 +93,7 @@ def lasso_regression(x, y, lmb=0.01):
         if iter_cnt % 10 == 0:
             print(iter_cnt, err_prev)
         for k in range(21):
-            z_k = sum(np.transpose(x[:, k]) * x[:, k])
+            z_k = (np.transpose(x[:, k]) * x[:, k]).sum()
             w_k = 0
             for i in range(m):
                 w_k += x[i, k] * (y[i] - sum(x[i, j] * w[j] for j in range(21) if j != k))
@@ -110,15 +109,13 @@ def lasso_regression(x, y, lmb=0.01):
 
 def estimate_error(w, data_size):
     x, y = data_generate(data_size)
-    x = x / np.linalg.norm(x, axis=0)
-    y = y / np.linalg.norm(y, axis=0)
     y_predict = x.dot(w)
     mse = np.square(np.subtract(y, y_predict)).mean()
     return mse
 
 
 if __name__ == '__main__':
-    test_case = 3
+    test_case = 2
     if test_case == 0:
         X, Y = data_generate(1000)
         w = naive_regression(X, Y, True)
@@ -140,7 +137,7 @@ if __name__ == '__main__':
             w = ridge_regression(X, Y, True, 0.005)
             print(w)
     elif test_case == 2:
-        l = np.linspace(0, 100, 100)
+        l = np.linspace(0, 2000, 1000)
         num_eliminate = []
         for tmp_l in l:
             X, Y = data_generate(1000)
@@ -150,6 +147,7 @@ if __name__ == '__main__':
                 if tmp_w == 0:
                     tmp_eliminate += 1
             num_eliminate.append(tmp_eliminate)
+            print('l=', tmp_l, ' num=', tmp_eliminate)
         plt.plot(l, num_eliminate)
         plt.show()
     elif test_case == 3:
@@ -165,6 +163,6 @@ if __name__ == '__main__':
             plt.show()
         else:
             X, Y = data_generate(1000)
-            w = lasso_regression(X, Y, 0.1)
+            w = lasso_regression(X, Y, 1000000)
             print(w)
 
