@@ -29,7 +29,7 @@ def naive_regression(x, y, gradient_descent=False):
         iter_cnt = 0
         learning_rate = 0.009
         err_prev = 9999999
-        threshold = 1e-7
+        threshold = 1e-10
 
         while True:
             y_predict = x.dot(w)
@@ -77,7 +77,7 @@ def ridge_regression(x, y, gradient_descent=False, lmb=0):
         return np.linalg.inv(xtx + lmb * np.identity(21)).dot(x.transpose()).dot(y)
 
 
-def lasso_regression(x, y, lmb=1):
+def lasso_regression(x, y, lmb=3000):
     m = x.shape[0]
     w = np.zeros(21)
     iter_cnt = 0
@@ -86,7 +86,7 @@ def lasso_regression(x, y, lmb=1):
 
     while True:
         y_predict = x.dot(w)
-        err = np.sum((y - y_predict) ** 2) / m + lmb * np.linalg.norm(w, 1) ** 2
+        err = np.sum((y - y_predict) ** 2) / m + lmb * np.linalg.norm(w, 1)
         print(err_prev, err)
         if err_prev - err < threshold:
             return w
@@ -104,10 +104,10 @@ def lasso_regression(x, y, lmb=1):
             w[k] = w_k
 
 
-def estimate_error(w):
-    w_real = np.array([pow(0.6, i + 1) for i in range(10)])
-    w_real = np.concatenate(([10], w_real, np.ones(10)))
-    mse = np.square(np.subtract(w_real, w)).mean()
+def estimate_error(w, data_size):
+    x, y = data_generate(data_size)
+    y_predict = x.dot(w)
+    mse = np.square(np.subtract(y, y_predict)).mean()
     return mse
 
 
@@ -115,15 +115,16 @@ if __name__ == '__main__':
     test_case = 1
     if test_case == 0:
         X, Y = data_generate(1000)
-        w = naive_regression(X, Y, False)
+        w = naive_regression(X, Y, True)
         print(w)
+        print(estimate_error(w, 10000))
     elif test_case == 1:
-        l = np.linspace(0, 0.5, 200)
+        l = np.linspace(0, 1, 200)
         err = []
         for tmp_l in l:
             X, Y = data_generate(1000)
-            w = ridge_regression(X, Y, False, tmp_l)
-            err.append(estimate_error(w))
+            w = ridge_regression(X, Y, True, tmp_l)
+            err.append(estimate_error(w, 1000))
         plt.plot(l, err)
         plt.show()
     elif test_case == 2:
