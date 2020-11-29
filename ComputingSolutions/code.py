@@ -29,7 +29,7 @@ def naive_regression(x, y, gradient_descent=False):
         iter_cnt = 0
         learning_rate = 0.009
         err_prev = 9999999
-        threshold = 1e-7
+        threshold = 1e-10
 
         while True:
             y_predict = x.dot(w)
@@ -48,7 +48,7 @@ def naive_regression(x, y, gradient_descent=False):
         return np.linalg.inv(xtx).dot(x.transpose()).dot(y)
 
 
-def ridge_regression(x, y, gradient_descent=False, lmb=0):
+def ridge_regression(x, y, gradient_descent=False, lmb=0.1):
     # gradient_descent set to true to use gradient descent
     # algebraic solution set to false for algebraic solution
     if gradient_descent:
@@ -57,7 +57,7 @@ def ridge_regression(x, y, gradient_descent=False, lmb=0):
         iter_cnt = 0
         learning_rate = 0.009
         err_prev = 9999999
-        threshold = 1e-7
+        threshold = 1e-30
 
         while True:
             y_predict = x.dot(w)
@@ -115,17 +115,23 @@ if __name__ == '__main__':
     test_case = 1
     if test_case == 0:
         X, Y = data_generate(1000)
-        w = naive_regression(X, Y, False)
+        w = naive_regression(X, Y, True)
         print(w)
     elif test_case == 1:
-        l = np.linspace(0, 0.5, 200)
-        err = []
-        for tmp_l in l:
+        iter_lmb = False
+        if iter_lmb:
+            l = np.linspace(0, 0.5, 200)
+            err = []
+            for tmp_l in l:
+                X, Y = data_generate(1000)
+                w = ridge_regression(X, Y, True, tmp_l)
+                err.append(estimate_error(w))
+            plt.plot(l, err)
+            plt.show()
+        else:
             X, Y = data_generate(1000)
-            w = ridge_regression(X, Y, False, tmp_l)
-            err.append(estimate_error(w))
-        plt.plot(l, err)
-        plt.show()
+            w = ridge_regression(X, Y, True, 0.005)
+            print(w)
     elif test_case == 2:
         X, Y = data_generate(1000)
         w = lasso_regression(X, Y)
