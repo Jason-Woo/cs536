@@ -82,7 +82,7 @@ def lasso_regression(x, y, lmb=0.01):
     w = np.zeros(21)
     iter_cnt = 0
     err_prev = 9999999
-    threshold = 1e-3
+    threshold = 1e-8
 
     while True:
         y_predict = x.dot(w)
@@ -105,21 +105,27 @@ def lasso_regression(x, y, lmb=0.01):
         iter_cnt += 1
 
 
-def estimate_error(w, data_size):
+def estimate_error(w, data_size, important_features=False):
     x, y = data_generate(data_size)
-    y_predict = x.dot(w)
+    if important_features:
+        x_new = np.hstack((x[:, 0:9], x[:, 10:12], x[:, 15:16]))
+        y_predict = x_new.dot(w)
+    else:
+        y_predict = x.dot(w)
     mse = np.square(np.subtract(y, y_predict)).mean()
     return mse
 
 
 if __name__ == '__main__':
-    test_case = 4
+    test_case = 2
     if test_case == 0:
+        # Question 1.1
         X, Y = data_generate(1000)
         w = naive_regression(X, Y, True)
         print(w)
         print(estimate_error(w, 10000))
     elif test_case == 1:
+        # Question 1.2
         iter_lmb = False
         if iter_lmb:
             l = np.linspace(0, 0.5, 200)
@@ -135,6 +141,7 @@ if __name__ == '__main__':
             w = ridge_regression(X, Y, True, 0.005)
             print(w)
     elif test_case == 2:
+        # Question 1.3
         l = np.linspace(0, 2000, 1000)
         num_eliminate = []
         for tmp_l in l:
@@ -149,9 +156,10 @@ if __name__ == '__main__':
         plt.plot(l, num_eliminate)
         plt.show()
     elif test_case == 3:
+        # Question 1.4
         iter_lmb = True
         if iter_lmb:
-            l = np.linspace(0, 10, 1000)
+            l = np.linspace(0, 50, 50)
             err = []
             for tmp_l in l:
                 X, Y = data_generate(1000)
@@ -164,20 +172,22 @@ if __name__ == '__main__':
             w = lasso_regression(X, Y, 0.01)
             print(w)
     elif test_case == 4:
-        important_features = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 15]
-        iter_lmb = True
+        # Question 1.5
+        iter_lmb = False
         if iter_lmb:
-            l = np.linspace(0, 0.5, 200)
+            l = np.linspace(0, 1, 100)
             err = []
             for tmp_l in l:
                 X, Y = data_generate(1000)
                 X_new = np.hstack((X[:, 0:9], X[:, 10:12], X[:, 15:16]))
-                w = ridge_regression(X, Y, True, tmp_l)
-                err.append(estimate_error(w, 10000))
+                w = ridge_regression(X_new, Y, True, tmp_l)
+                err.append(estimate_error(w, 10000, True))
             plt.plot(l, err)
             plt.show()
         else:
             X, Y = data_generate(1000)
-            w = ridge_regression(X, Y, True, 0.005)
+            X_new = np.hstack((X[:, 0:9], X[:, 10:12], X[:, 15:16]))
+            w = ridge_regression(X_new, Y, True, 0)
             print(w)
+            print(estimate_error(w, 10000, True))
 
