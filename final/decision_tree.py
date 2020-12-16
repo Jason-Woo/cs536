@@ -4,11 +4,15 @@ import numpy as np
 
 
 class TreeNode:
-    def __init__(self, key, left=None, right=None, label=-1):
+    def __init__(self, key, label=-1):
         self.key = key  # For leaf, key = -1
-        self.left = left
-        self.right = right
+        self.children = []
+        self.children_label = []
         self.label = label  # For tree node, label = -1
+
+    def add_child(self, child, label):
+        self.children.append(child)
+        self.children_label.append(label)
 
 
 class DecisionTree:
@@ -60,72 +64,37 @@ class DecisionTree:
             data_x_split.append([])
             data_y_split.append([])
         for i in range(len(data_x)):
-            key.index()
+            j = key.index(data_x[i][idx])
+            data_x_split[j].append(copy.deepcopy(data_x[i][:idx] + data_x[i][idx + 1:]))
+            data_y_split[j].append(copy.deepcopy(data_y[i]))
+        return data_x_split, data_y_split
 
     def build_tree(self, data_x, data_y, label_list, depth, threshold):
-        """
-            split data set into two parts based on the value of given feature
-            ----------
-            Parameters
-            data_x: 2-d list
-                feature values of data
-            data_y: list
-                the label of each data
-            label list: list
-                the name of features of data_x
-            depth: integer
-                The maximum depth we allowed for the tree
-            threshold: integer
-                The minimum size of data we allowed for each node
-            ----------
-            Return
-            node: tree_node object
-                the decision tree build with the training data
-        """
-        if sum(data_y) == 0 or sum(data_y) == len(data_y):   # All data in the node have same label, then it is a leaf node
+        if len(list(set(data_y))) == 1:  # All data in the node have same label, then it is a leaf node
             leaf = TreeNode(-1, label=data_y[0])
             return leaf
         elif len(data_x[0]) == 0 or depth == 0 or len(data_y) <= threshold:
             # All feature have been use, or we are reaching maximal depth or minimal size of data, then it is a leaf node
-            lbl = 1 if 2 * sum(data_y) > len(data_y) else 0
-            leaf = TreeNode(-1, label=lbl)
+            label_cnt = {}
+            for label in data_y:
+                label_cnt[label] = label_cnt.get(label, 0) + 1
+            label_max = max(label_cnt.items(), key=lambda x: x[1])[0]
+            leaf = TreeNode(-1, label=label_max)
             return leaf
         else:
-            key = -1
-            if self.method == 'id3':
-                key = self.find_key_id3(data_x, data_y)
-            data_x1, data_x2, data_y1, data_y2 = self.split_data(data_x, data_y, key)
-            node = TreeNode(label_list[key])
+            idx, key = self.find_key_id3(data_x, data_y)
+            data_x_split, data_y_split = self.split_data(data_x, data_y, idx, key)
+            node = TreeNode(label_list[idx])
             new_label_list = copy.deepcopy(label_list[:key] + label_list[key + 1:])
-            left_node = self.build_tree(data_x1, data_y1, new_label_list, depth - 1, threshold)
-            right_node = self.build_tree(data_x2, data_y2, new_label_list, depth - 1, threshold)
-            node.left = left_node
-            node.right = right_node
+            for i in range(len(data_x_split)):
+                children_node = self.build_tree(data_x_split[i], data_y_split[i], new_label_list, depth - 1, threshold)
+                node.add_child(children_node, key[i])
             return node
 
     def train(self, data_x, data_y):
+        label_list = [i for i in range(len(data_x[0]))]
         self.tree = self.build_tree(data_x, data_y, [], self.max_depth, self.min_num)
 
     def predict(self, data_test):
-        """
-            Predict label of test data using the decision tree
-            ----------
-            Parameters
-            data_test: 2-d list
-                feature values of testing data
-            ----------
-            Return
-            res: list
-                predicted label of the testing data
-        """
-        res = []
-        for data in data_test:
-            tmp_tree = self.tree
-            while tmp_tree.key != -1:
-                if data[tmp_tree.key] == 0:
-                    tmp_tree = tmp_tree.left
-                else:
-                    tmp_tree = tmp_tree.right
-            res.append(tmp_tree.label)
-        return res
+        return 0
 
