@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Regression:
-    def __init__(self, method='naive', lmb=0.1):
+    def __init__(self, method='naive', lmb=0.01):
         self.method = method
         self.lmb = lmb
         self.w = None
@@ -39,12 +39,12 @@ class Regression:
 
         w = np.zeros(n)
         iter_cnt = 0
-        learning_rate = 0.009
+        learning_rate = 0.1
         err_prev = 9999999
         threshold = 1e-10
         while True:
             y_predict = x.dot(w)
-            err = np.sum((y - y_predict) ** 2) / m + lmb * np.linalg.norm(w, 2) ** 2
+            err = np.sum((y - y_predict) ** 2) / m + self.lmb * np.linalg.norm(w, 2) ** 2
             if err_prev - err < threshold:
                 return w
             err_prev = err
@@ -61,7 +61,7 @@ class Regression:
         w = np.zeros(n)
         iter_cnt = 0
         err_prev = 9999999
-        threshold = 1e-8
+        threshold = 1e-9
 
         while True:
             y_predict = x.dot(w)

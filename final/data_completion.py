@@ -115,17 +115,7 @@ def one_hot_encoding(data):
     return encoded_data
 
 
-if __name__ == '__main__':
-    dataset_path = 'Skyserver_SQL2_27_2018 6_51_39 PM.csv'
-    dataset_path1 = 'test.csv'
-    target_col = [13]
-    cross_validation_size = 8
-    regression_model = 'regression'
-    classification_model = 'random_forest'
-
-    data_x, data_y, f_x, f_y = generate_data(dataset_path1, target_col, cross_validation_size)
-    task_priority = get_task_priority(f_y)
-
+def data_completion(data_x, data_y, f_y, regression_model, classification_model, cross_validation_size):
     acc_regression, acc_classification = 0, 0
     num_regression, num_classification = 0, 0
     for i in range(cross_validation_size):
@@ -160,8 +150,18 @@ if __name__ == '__main__':
 
             elif f_y[task] == 'continuous_num':
                 training_label_normalized, meta_data = normalization(training_label[task].astype(np.float64))
-                if regression_model == 'regression':
-                    model = Regression()
+                if regression_model == 'naive_regression':
+                    model = Regression(method='naive')
+                    model.train(training_data, training_label_normalized)
+                    predict_label_normalized = model.predict(testing_data)
+                    predict_label = normalization_reverse(predict_label_normalized, meta_data)
+                elif regression_model == 'ridge_regression':
+                    model = Regression(method='ridge')
+                    model.train(training_data, training_label_normalized)
+                    predict_label_normalized = model.predict(testing_data)
+                    predict_label = normalization_reverse(predict_label_normalized, meta_data)
+                elif regression_model == 'lasso_regression':
+                    model = Regression(method='lasso')
                     model.train(training_data, training_label_normalized)
                     predict_label_normalized = model.predict(testing_data)
                     predict_label = normalization_reverse(predict_label_normalized, meta_data)
@@ -181,15 +181,58 @@ if __name__ == '__main__':
                 normalized_label = normalized_label[:, np.newaxis]
                 training_data = np.hstack((training_data, normalized_label[:len(training_label[task])]))
                 testing_data = np.hstack((testing_data, normalized_label[len(training_label[task]):]))
+    acc = [-1, -1]
+    have_task = [0, 0]
     if num_classification != 0:
         acc_classification /= num_classification
-        print(acc_classification)
+        have_task[0] = 1
+        acc[0] = acc_classification
     if num_regression != 0:
         acc_regression /= num_regression
-        print(acc_regression)
+        have_task[1] = 1
+        acc[1] = acc_regression
+    return have_task, acc
 
 
+if __name__ == '__main__':
+    dataset_path = 'Skyserver_SQL2_27_2018 6_51_39 PM.csv'
+    dataset_path1 = 'test.csv'
+    target_col = [1, 2]
+    cross_validation_size = 8
+    regression_model_list = ['naive_regression', 'ridge_regression', 'lasso_regression']
+    classification_model_list = ['knn', 'decision_tree', 'random_forest']
+    find_best_model = False
 
+    best_regression_model, best_classification_model = None, None
+    best_regression_loss, best_classification_acc = 1e20, 0
 
+    x, y, f_x, f_y = generate_data(dataset_path1, target_col, cross_validation_size)
+    task_priority = get_task_priority(f_y)
 
-
+    if find_best_model:
+        for i in range(3):
+            status, accuracy = data_completion(x, y, f_y, regression_model_list[i], classification_model_list[i], cross_validation_size)
+            if status[1] == 1:
+                if accuracy[0] < best_regression_loss:
+                    best_regression_loss = accuracy[1]
+                    best_regression_model = regression_model_list[i]
+            if status[0] == 1:
+                if accuracy[1] > best_classification_acc:
+                    best_classification_acc = accuracy[0]
+                    best_classification_model = classification_model_list[i]
+        print("-----------------------------------")
+        if best_regression_model is not None:
+            print("Best regression model is ", best_regression_loss)
+            print("RMSE = ", best_regression_loss)
+        if best_classification_model is not None:
+            print("Best classification model is ", best_classification_model)
+            print("Accuracy = ", best_classification_acc)
+    else:
+        regression_model = 'lasso_regression'
+        classification_model = 'random_forest'
+        status, accuracy = data_completion(x, y, f_y, regression_model, classification_model, cross_validation_size)
+        print("-----------------------------------")
+        if status[1] == 1:
+            print("For regression mode, RMSE = ", accuracy[1])
+        if status[0] == 1:
+            print("For classification model, Accuracy = ", accuracy[0])
