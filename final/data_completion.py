@@ -1,6 +1,7 @@
 from knn import *
 from regression import *
 from decision_tree import *
+from random_forest import *
 from math import sqrt
 
 import numpy as np
@@ -120,9 +121,9 @@ if __name__ == '__main__':
     target_col = [13]
     cross_validation_size = 8
     regression_model = 'regression'
-    classification_model = 'decision_tree'
+    classification_model = 'random_forest'
 
-    data_x, data_y, f_x, f_y = generate_data(dataset_path, target_col, cross_validation_size)
+    data_x, data_y, f_x, f_y = generate_data(dataset_path1, target_col, cross_validation_size)
     task_priority = get_task_priority(f_y)
 
     acc_regression, acc_classification = 0, 0
@@ -140,8 +141,11 @@ if __name__ == '__main__':
                 if classification_model == 'knn':
                     model = KNN(20)
                     predict_label = model.train_and_predict(training_data, training_label[task], testing_data)
-                if classification_model == 'decision_tree':
-                    model = DecisionTree(max_depth=10)
+                elif classification_model == 'decision_tree':
+                    model = DecisionTree(max_depth=10, k=10)
+                    predict_label = model.train_and_predict(training_data, training_label[task], testing_data)
+                elif classification_model == 'random_forest':
+                    model = RandomForest(8)
                     predict_label = model.train_and_predict(training_data, training_label[task], testing_data)
                 tmp_acc = 0
                 if f_y[task] == 'discrete_num':

@@ -16,7 +16,7 @@ def get_feature_type(data):
     for i in range(len(data[0])):
         if is_number(data[0][i]):
             tmp_col = list(map(float, data[:, i]))
-            if len(set(tmp_col[:50])) <= 10:
+            if len(set(tmp_col[:50])) <= 6:
                 feature_type.append('discrete_num')
             else:
                 feature_type.append('continuous_num')
@@ -38,7 +38,7 @@ class TreeNode:
 
 
 class DecisionTree:
-    def __init__(self, max_depth=-1, min_num=-1, k=5):
+    def __init__(self, max_depth=-1, min_num=-1, k=10):
         self.max_depth = max_depth
         self.min_num = min_num
         self.tree = None
