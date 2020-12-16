@@ -38,8 +38,7 @@ class TreeNode:
 
 
 class DecisionTree:
-    def __init__(self, method='id3', max_depth=-1, min_num=-1, k=5):
-        self.method = method
+    def __init__(self, max_depth=-1, min_num=-1, k=5):
         self.max_depth = max_depth
         self.min_num = min_num
         self.tree = None

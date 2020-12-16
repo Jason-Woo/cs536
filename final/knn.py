@@ -8,7 +8,8 @@ class KNN:
         self.method = method
 
     def euclidean_distance(self, arr1, arr2):
-        return np.linalg.norm(arr1 - arr2, ord=2)
+        return np.sqrt(np.sum((arr1 - arr2) ** 2))
+        # return np.linalg.norm(arr1 - arr2, ord=2)
 
     def manhattan_distance(self, arr1, arr2):
         return np.linalg.norm(arr1 - arr2, ord=1)

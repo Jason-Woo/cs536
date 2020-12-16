@@ -1,6 +1,7 @@
 from knn import *
 from regression import *
 from decision_tree import *
+from math import sqrt
 
 import numpy as np
 import csv
@@ -42,7 +43,7 @@ def generate_data(dataset, cols, k=10):
 
 def cal_acc(label_real, label_predict, task):
     if task == 'regression':
-        return np.square(np.subtract(label_real, label_predict)).mean()
+        return sqrt(np.square(np.subtract(label_real, label_predict)).mean())
     elif task == 'classification_num':
         cnt = 0
         for i in range(len(label_real)):
@@ -116,12 +117,12 @@ def one_hot_encoding(data):
 if __name__ == '__main__':
     dataset_path = 'Skyserver_SQL2_27_2018 6_51_39 PM.csv'
     dataset_path1 = 'test.csv'
-    target_col = [13, 10]
-    cross_validation_size = 2
+    target_col = [13]
+    cross_validation_size = 8
     regression_model = 'regression'
     classification_model = 'decision_tree'
 
-    data_x, data_y, f_x, f_y = generate_data(dataset_path1, target_col, cross_validation_size)
+    data_x, data_y, f_x, f_y = generate_data(dataset_path, target_col, cross_validation_size)
     task_priority = get_task_priority(f_y)
 
     acc_regression, acc_classification = 0, 0
@@ -137,10 +138,10 @@ if __name__ == '__main__':
             predict_label = None
             if f_y[task] == 'discrete_num' or f_y[task] == 'string':
                 if classification_model == 'knn':
-                    model = KNN(50)
+                    model = KNN(20)
                     predict_label = model.train_and_predict(training_data, training_label[task], testing_data)
                 if classification_model == 'decision_tree':
-                    model = DecisionTree()
+                    model = DecisionTree(max_depth=10)
                     predict_label = model.train_and_predict(training_data, training_label[task], testing_data)
                 tmp_acc = 0
                 if f_y[task] == 'discrete_num':
