@@ -3,6 +3,28 @@ import copy
 import numpy as np
 
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def get_feature_type(data):
+    feature_type = []
+    for i in range(len(data[0])):
+        if is_number(data[0][i]):
+            tmp_col = list(map(float, data[:, i]))
+            if len(set(tmp_col[:50])) <= 10:
+                feature_type.append('discrete_num')
+            else:
+                feature_type.append('continuous_num')
+        else:
+            feature_type.append('string')
+    return feature_type
+
+
 class TreeNode:
     def __init__(self, key, label=-1):
         self.key = key  # For leaf, key = -1
@@ -16,11 +38,12 @@ class TreeNode:
 
 
 class DecisionTree:
-    def __init__(self, method='id3', max_depth=-1, min_num=-1):
+    def __init__(self, method='id3', max_depth=-1, min_num=-1, k=5):
         self.method = method
         self.max_depth = max_depth
         self.min_num = min_num
         self.tree = None
+        self.k = k
 
     def find_key_id3(self, data_x, data_y):
         label_dict = {}
@@ -65,7 +88,8 @@ class DecisionTree:
             data_y_split.append([])
         for i in range(len(data_x)):
             j = key.index(data_x[i][idx])
-            data_x_split[j].append(copy.deepcopy(data_x[i][:idx] + data_x[i][idx + 1:]))
+            new_data = np.delete(data_x[i], idx)
+            data_x_split[j].append(copy.deepcopy(new_data.tolist()))
             data_y_split[j].append(copy.deepcopy(data_y[i]))
         return data_x_split, data_y_split
 
@@ -85,24 +109,42 @@ class DecisionTree:
             idx, key = self.find_key_id3(data_x, data_y)
             data_x_split, data_y_split = self.split_data(data_x, data_y, idx, key)
             node = TreeNode(label_list[idx])
-            new_label_list = copy.deepcopy(label_list[:key] + label_list[key + 1:])
+            new_label_list = copy.deepcopy(label_list[:idx] + label_list[idx + 1:])
             for i in range(len(data_x_split)):
                 children_node = self.build_tree(data_x_split[i], data_y_split[i], new_label_list, depth - 1, threshold)
                 node.add_child(children_node, key[i])
             return node
 
-    def train(self, data_x, data_y):
-        label_list = [i for i in range(len(data_x[0]))]
-        self.tree = self.build_tree(data_x, data_y, label_list, self.max_depth, self.min_num)
+    def continuous_to_discrete(self, data):
+        feature_type = get_feature_type(data)
+        for i in range(len(feature_type)):
+            if feature_type[i] == 'continuous_num':
+                min_val = min(data[:, i])
+                max_val = max(data[:, i])
+                interval = (max_val - min_val) / self.k
+                for j in range(len(data)):
+                    if data[j][i] == max_val:
+                        data[j][i] = self.k - 1
+                    else:
+                        data[j][i] = (data[j][i] - min_val) // interval
+        return data
 
-    def predict(self, data_test):
+    def train_and_predict(self, data_train, label, data_test):
+        data_dis = self.continuous_to_discrete(np.vstack((data_train, data_test)))
+        data_train_dis = data_dis[:len(data_train)]
+        data_test_dis = data_dis[len(data_train):]
+        label_list = [i for i in range(len(data_train[0]))]
+        self.tree = self.build_tree(data_train_dis, label, label_list, self.max_depth, self.min_num)
+
         label_predict = []
-        for data in data_test:
+        for data in data_test_dis:
             tmp_tree = self.tree
             while tmp_tree.key != -1:  # keep diving until reach leaf node
                 key = tmp_tree.key
-                i = tmp_tree.children_label.index(data[key])
-                tmp_tree = tmp_tree.children[i]
+                try:
+                    i = tmp_tree.children_label.index(data[key])
+                except:
+                    i = 0
+                tmp_tree = tmp_tree.children[int(i)]
             label_predict.append(tmp_tree.label)
-        return label_predict
-
+        return np.array(label_predict)

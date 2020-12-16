@@ -1,5 +1,6 @@
 from knn import *
 from regression import *
+from decision_tree import *
 
 import numpy as np
 import csv
@@ -118,12 +119,13 @@ if __name__ == '__main__':
     target_col = [13, 10]
     cross_validation_size = 2
     regression_model = 'regression'
-    classification_model = 'knn'
+    classification_model = 'decision_tree'
 
     data_x, data_y, f_x, f_y = generate_data(dataset_path1, target_col, cross_validation_size)
     task_priority = get_task_priority(f_y)
 
     acc_regression, acc_classification = 0, 0
+    num_regression, num_classification = 0, 0
     for i in range(cross_validation_size):
         print("Cross Validation fold ", i)
         training_data = np.vstack(data_x[:i] + data_x[i + 1:])
@@ -137,12 +139,19 @@ if __name__ == '__main__':
                 if classification_model == 'knn':
                     model = KNN(50)
                     predict_label = model.train_and_predict(training_data, training_label[task], testing_data)
+                if classification_model == 'decision_tree':
+                    model = DecisionTree()
+                    predict_label = model.train_and_predict(training_data, training_label[task], testing_data)
+                tmp_acc = 0
                 if f_y[task] == 'discrete_num':
-                    acc_classification += cal_acc(testing_label[task], predict_label, 'classification_num')
+                    tmp_acc = cal_acc(testing_label[task], predict_label, 'classification_num')
+                    acc_classification += tmp_acc
+                    num_classification += 1
                 elif f_y[task] == 'string':
-                    acc_classification += cal_acc(testing_label[task], predict_label, 'classification_str')
-
-                print("acc_classification = ", acc_classification)
+                    tmp_acc = cal_acc(testing_label[task], predict_label, 'classification_str')
+                    acc_classification += tmp_acc
+                    num_classification += 1
+                print("acc_classification = ", tmp_acc)
 
             elif f_y[task] == 'continuous_num':
                 training_label_normalized, meta_data = normalization(training_label[task].astype(np.float64))
@@ -151,8 +160,10 @@ if __name__ == '__main__':
                     model.train(training_data, training_label_normalized)
                     predict_label_normalized = model.predict(testing_data)
                     predict_label = normalization_reverse(predict_label_normalized, meta_data)
-                acc_regression += cal_acc(testing_label[task].astype(np.float64), predict_label, 'regression')
-                print("acc_regression = ", acc_regression)
+                tmp_acc = cal_acc(testing_label[task].astype(np.float64), predict_label, 'regression')
+                acc_regression += tmp_acc
+                num_regression += 1
+                print("acc_regression = ", tmp_acc)
 
             if f_y[task] == 'string':
                 new_label = np.hstack((training_label[task], predict_label))
@@ -165,10 +176,12 @@ if __name__ == '__main__':
                 normalized_label = normalized_label[:, np.newaxis]
                 training_data = np.hstack((training_data, normalized_label[:len(training_label[task])]))
                 testing_data = np.hstack((testing_data, normalized_label[len(training_label[task]):]))
-    acc_classification /= cross_validation_size
-    acc_regression /= cross_validation_size
-    print(acc_classification)
-    print(acc_regression)
+    if num_classification != 0:
+        acc_classification /= num_classification
+        print(acc_classification)
+    if num_regression != 0:
+        acc_regression /= num_regression
+        print(acc_regression)
 
 
 
