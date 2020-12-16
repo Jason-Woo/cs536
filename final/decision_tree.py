@@ -93,8 +93,16 @@ class DecisionTree:
 
     def train(self, data_x, data_y):
         label_list = [i for i in range(len(data_x[0]))]
-        self.tree = self.build_tree(data_x, data_y, [], self.max_depth, self.min_num)
+        self.tree = self.build_tree(data_x, data_y, label_list, self.max_depth, self.min_num)
 
     def predict(self, data_test):
-        return 0
+        label_predict = []
+        for data in data_test:
+            tmp_tree = self.tree
+            while tmp_tree.key != -1:  # keep diving until reach leaf node
+                key = tmp_tree.key
+                i = tmp_tree.children_label.index(data[key])
+                tmp_tree = tmp_tree.children[i]
+            label_predict.append(tmp_tree.label)
+        return label_predict
 
