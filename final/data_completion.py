@@ -197,26 +197,32 @@ def data_completion(data_x, data_y, f_y, regression_model, classification_model,
 if __name__ == '__main__':
     dataset_path = 'Skyserver_SQL2_27_2018 6_51_39 PM.csv'
     dataset_path1 = 'test.csv'
-    target_col = [1, 2]
-    cross_validation_size = 8
+    target_col = [1]
+    cross_validation_size = 10
     regression_model_list = ['naive_regression', 'ridge_regression', 'lasso_regression']
     classification_model_list = ['knn', 'decision_tree', 'random_forest']
-    find_best_model = False
+    find_best_model = True
 
     best_regression_model, best_classification_model = None, None
     best_regression_loss, best_classification_acc = 1e20, 0
 
-    x, y, f_x, f_y = generate_data(dataset_path1, target_col, cross_validation_size)
+    x, y, f_x, f_y = generate_data(dataset_path, target_col, cross_validation_size)
     task_priority = get_task_priority(f_y)
 
     if find_best_model:
         for i in range(3):
             status, accuracy = data_completion(x, y, f_y, regression_model_list[i], classification_model_list[i], cross_validation_size)
             if status[1] == 1:
+                print("*****")
+                print(regression_model_list[i], accuracy[0])
+                print("*****")
                 if accuracy[0] < best_regression_loss:
                     best_regression_loss = accuracy[1]
                     best_regression_model = regression_model_list[i]
             if status[0] == 1:
+                print("*****")
+                print(classification_model_list[i], accuracy[1])
+                print("*****")
                 if accuracy[1] > best_classification_acc:
                     best_classification_acc = accuracy[0]
                     best_classification_model = classification_model_list[i]
