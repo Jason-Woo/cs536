@@ -236,7 +236,7 @@ if __name__ == '__main__':
     else:
         regression_model = 'basic_completion'
         classification_model = 'basic_completion'
-        status, accuracy = data_completion(x, y, f_y, regression_model, classification_model, cross_validation_size)
+        status, accuracy = data_completion(x, y, f_y, regression_model, classification_model, cross_validation_size, task_priority)
         print("-----------------------------------")
         if status[1] == 1:
             print("For regression mode, RMSE = ", accuracy[1])

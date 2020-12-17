@@ -7,6 +7,7 @@ from math import sqrt
 
 import numpy as np
 import csv
+import random
 
 def is_number(s):
     try:
@@ -155,7 +156,6 @@ if __name__ == '__main__':
         x, y, f_x, f_y = generate_data(np.vstack((data_full, basic_data)), i)
         label = data_completion(x, y, f_y, 0, regression_model, classification_model, len(data_full))
         basic_data[:, i] = label
-    print(basic_data.shape)
     np.savetxt("generate.csv", basic_data, delimiter=",", fmt='%s')
 
 
