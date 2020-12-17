@@ -44,7 +44,7 @@ def basic_generate(dataset, size):
             max_val = max(dataset[:, i].astype(np.float64))
             for j in range(size):
                 tmp_data.append(str(random.uniform(min_val, max_val)))
-        data_generate.append(tmp_data)
+        data_generate.append(np.array(tmp_data))
     return np.array(data_generate).transpose()
 
 def one_hot_encoding(data):
@@ -151,10 +151,12 @@ if __name__ == '__main__':
     basic_data = basic_generate(data_full, generate_data_size)
 
     for i in range(len(data_full[0])):
+        print("Predicting row", i)
         x, y, f_x, f_y = generate_data(np.vstack((data_full, basic_data)), i)
         label = data_completion(x, y, f_y, 0, regression_model, classification_model, len(data_full))
         basic_data[:, i] = label
-    np.savetxt("generate.csv", basic_data, delimiter=",")
+    print(basic_data.shape)
+    np.savetxt("generate.csv", basic_data, delimiter=",", fmt='%s')
 
 
 
