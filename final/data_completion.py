@@ -2,6 +2,7 @@ from knn import *
 from regression import *
 from decision_tree import *
 from random_forest import *
+from basic_completion import *
 from math import sqrt
 
 import numpy as np
@@ -137,6 +138,9 @@ def data_completion(data_x, data_y, f_y, regression_model, classification_model,
                 elif classification_model == 'random_forest':
                     model = RandomForest(8)
                     predict_label = model.train_and_predict(training_data, training_label[task], testing_data)
+                elif classification_model == 'basic_completion':
+                    model = BasicCompletion('discrete')
+                    predict_label = model.predict(training_label[task], testing_data)
                 tmp_acc = 0
                 if f_y[task] == 'discrete_num':
                     tmp_acc = cal_acc(testing_label[task], predict_label, 'classification_num')
@@ -165,6 +169,9 @@ def data_completion(data_x, data_y, f_y, regression_model, classification_model,
                     model.train(training_data, training_label_normalized)
                     predict_label_normalized = model.predict(testing_data)
                     predict_label = normalization_reverse(predict_label_normalized, meta_data)
+                elif classification_model == 'basic_completion':
+                    model = BasicCompletion('continuous')
+                    predict_label = model.predict(training_label[task], testing_data)
                 tmp_acc = cal_acc(testing_label[task].astype(np.float64), predict_label, 'regression')
                 acc_regression += tmp_acc
                 num_regression += 1
@@ -197,7 +204,7 @@ def data_completion(data_x, data_y, f_y, regression_model, classification_model,
 if __name__ == '__main__':
     dataset_path = 'Skyserver_SQL2_27_2018 6_51_39 PM.csv'
     dataset_path1 = 'test.csv'
-    target_col = [1]
+    target_col = [3]
     cross_validation_size = 10
     regression_model_list = ['naive_regression', 'ridge_regression', 'lasso_regression']
     classification_model_list = ['knn', 'decision_tree', 'random_forest']
@@ -214,16 +221,16 @@ if __name__ == '__main__':
             status, accuracy = data_completion(x, y, f_y, regression_model_list[i], classification_model_list[i], cross_validation_size)
             if status[1] == 1:
                 print("*****")
-                print(regression_model_list[i], accuracy[0])
+                print(regression_model_list[i], accuracy[1])
                 print("*****")
-                if accuracy[0] < best_regression_loss:
+                if accuracy[1] < best_regression_loss:
                     best_regression_loss = accuracy[1]
                     best_regression_model = regression_model_list[i]
             if status[0] == 1:
                 print("*****")
-                print(classification_model_list[i], accuracy[1])
+                print(classification_model_list[i], accuracy[0])
                 print("*****")
-                if accuracy[1] > best_classification_acc:
+                if accuracy[0] > best_classification_acc:
                     best_classification_acc = accuracy[0]
                     best_classification_model = classification_model_list[i]
         print("-----------------------------------")
