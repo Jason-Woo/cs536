@@ -34,8 +34,7 @@ class RandomForest:
         for i in range(m):
             j = np.random.randint(0, m)
             for k, feature in enumerate(sample_feature):
-
-                data_train_sample[i][k] = data_train[i][feature]
+                data_train_sample[i][k] = data_train[j][feature]
             label_sample.append(label[i])
         for i in range(len(data_test)):
             for k, feature in enumerate(sample_feature):

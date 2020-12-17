@@ -116,7 +116,7 @@ def one_hot_encoding(data):
     return encoded_data
 
 
-def data_completion(data_x, data_y, f_y, regression_model, classification_model, cross_validation_size):
+def data_completion(data_x, data_y, f_y, regression_model, classification_model, cross_validation_size, task_priority):
     acc_regression, acc_classification = 0, 0
     num_regression, num_classification = 0, 0
     for i in range(cross_validation_size):
@@ -203,11 +203,10 @@ def data_completion(data_x, data_y, f_y, regression_model, classification_model,
 
 if __name__ == '__main__':
     dataset_path = 'Skyserver_SQL2_27_2018 6_51_39 PM.csv'
-    dataset_path1 = 'test.csv'
     target_col = [17]
     cross_validation_size = 10
-    regression_model_list = ['naive_regression', 'ridge_regression', 'lasso_regression']
-    classification_model_list = ['knn', 'decision_tree', 'random_forest']
+    regression_model_list = ['naive_regression', 'ridge_regression', 'lasso_regression', 'basic_completion']
+    classification_model_list = ['knn', 'decision_tree', 'random_forest', 'basic_completion']
     find_best_model = False
 
     best_regression_model, best_classification_model = None, None
@@ -218,18 +217,12 @@ if __name__ == '__main__':
 
     if find_best_model:
         for i in range(3):
-            status, accuracy = data_completion(x, y, f_y, regression_model_list[i], classification_model_list[i], cross_validation_size)
+            status, accuracy = data_completion(x, y, f_y, regression_model_list[i], classification_model_list[i], cross_validation_size, task_priority)
             if status[1] == 1:
-                print("*****")
-                print(regression_model_list[i], accuracy[1])
-                print("*****")
                 if accuracy[1] < best_regression_loss:
                     best_regression_loss = accuracy[1]
                     best_regression_model = regression_model_list[i]
             if status[0] == 1:
-                print("*****")
-                print(classification_model_list[i], accuracy[0])
-                print("*****")
                 if accuracy[0] > best_classification_acc:
                     best_classification_acc = accuracy[0]
                     best_classification_model = classification_model_list[i]
