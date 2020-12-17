@@ -4,6 +4,15 @@ import numpy as np
 
 
 def is_number(s):
+    """
+        Judge whether the given string can be converted into a number
+        ----------
+        Parameters
+        s: string
+        ----------
+        Return
+        whether s can be be converted into a number
+    """
     try:
         float(s)
         return True
@@ -12,6 +21,15 @@ def is_number(s):
 
 
 def get_feature_type(data):
+    """
+        Get the type of all features
+        ----------
+        Parameters
+        data: Dataset
+        ----------
+        Return
+        List of feature types of each columns
+    """
     feature_type = []
     for i in range(len(data[0])):
         if is_number(data[0][i]):
@@ -45,6 +63,16 @@ class DecisionTree:
         self.k = k
 
     def find_key_id3(self, data_x, data_y):
+        """
+            Return the feature with largest info-gain
+            ----------
+            Parameters
+            data_x: feature values of data
+            data_y: the label of each data
+            ----------
+            Return
+            max_key: the index of feature with largest info-gain of data_x
+        """
         label_dict = {}
         for label in data_y:
             label_dict[label] = label_dict.get(label, 0) + 1
@@ -81,6 +109,16 @@ class DecisionTree:
         return max_idx, keys
 
     def split_data(self, data_x, data_y, idx, key):
+        """
+            split data set into two parts based on the value of given feature
+            ----------
+            Parameters
+            data_x: feature values of data
+            data_y: the label of each data
+            idx: the feature that the partition based on
+            ----------
+            Return partition result
+        """
         data_x_split, data_y_split = [], []
         for i in range(len(key)):
             data_x_split.append([])
@@ -93,6 +131,19 @@ class DecisionTree:
         return data_x_split, data_y_split
 
     def build_tree(self, data_x, data_y, label_list, depth, threshold):
+        """
+            Build the decision tree using recursion
+            ----------
+            Parameters
+            data_x: feature values of data
+            data_y: the label of each data
+            label list: the name of features of data_x
+            depth: The maximum depth we allowed for the tree
+            threshold: The minimum size of data we allowed for each node
+            ----------
+            Return
+            node: the decision tree build with the training data
+        """
         if len(list(set(data_y))) == 1:  # All data in the node have same label, then it is a leaf node
             leaf = TreeNode(-1, label=data_y[0])
             return leaf
@@ -115,6 +166,15 @@ class DecisionTree:
             return node
 
     def continuous_to_discrete(self, data):
+        """
+            Convert continuous feature to discrete feature
+            ----------
+            Parameters
+            data: dataset
+            ----------
+            Return
+            dataset after convert
+        """
         feature_type = get_feature_type(data)
         for i in range(len(feature_type)):
             if feature_type[i] == 'continuous_num':

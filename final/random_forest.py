@@ -9,6 +9,15 @@ class RandomForest:
         self.k = k
 
     def continuous_to_discrete(self, data):
+        """
+            Convert continuous feature to discrete feature
+            ----------
+            Parameters
+            data: dataset
+            ----------
+            Return
+            dataset after convert
+        """
         feature_type = get_feature_type(data)
         for i in range(len(feature_type)):
             if feature_type[i] == 'continuous_num':
@@ -23,17 +32,33 @@ class RandomForest:
         return data
 
     def sample_data(self, data_train, label, data_test):
+        """
+            Sample dataset for training and testing
+            ----------
+            Parameters
+            data_train: Original training data
+            label:  Original label
+            data_test: Original testing data
+            ----------
+            Return
+            Sampled training data
+            Sampled label
+            Sampled testing data
+        """
         m, n = data_train.shape
         label_list = [i for i in range(n)]
 
+        # pick random features
         sample_feature = sorted(random.sample(label_list, self.num_feature))
 
         data_train_sample = np.zeros((m, self.num_feature))
         label_sample = []
         data_test_sample = np.zeros((len(data_test), self.num_feature))
         for i in range(m):
+            # pick m random rows
             j = np.random.randint(0, m)
             for k, feature in enumerate(sample_feature):
+                # pick feature
                 data_train_sample[i][k] = data_train[j][feature]
             label_sample.append(label[i])
         for i in range(len(data_test)):

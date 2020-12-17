@@ -9,7 +9,17 @@ import numpy as np
 import csv
 import random
 
+
 def is_number(s):
+    """
+        Judge whether the given string can be converted into a number
+        ----------
+        Parameters
+        s: string
+        ----------
+        Return
+        whether s can be be converted into a number
+    """
     try:
         float(s)
         return True
@@ -18,6 +28,15 @@ def is_number(s):
 
 
 def get_feature_type(data):
+    """
+        Get the type of all features
+        ----------
+        Parameters
+        data: Dataset
+        ----------
+        Return
+        List of feature types of each columns
+    """
     feature_type = []
     for i in range(len(data[0])):
         if is_number(data[0][i]):
@@ -32,6 +51,16 @@ def get_feature_type(data):
 
 
 def basic_generate(dataset, size):
+    """
+        Generate data according to assumed distribution
+        ----------
+        Parameters
+        dataset: Real dataset
+        size: size of generated dataset
+        ----------
+        Return
+        The generated dataset
+    """
     feature_type = get_feature_type(dataset)
     data_generate = []
     for i in range(len(feature_type)):
@@ -39,16 +68,28 @@ def basic_generate(dataset, size):
         if feature_type[i] == 'discrete_num' or 'string':
             ele_set = list(set(dataset[:, i]))
             for j in range(size):
+                # Assume that discrete features satisfy distribution
                 tmp_data.append(random.sample(ele_set, 1)[0])
         elif feature_type[i] == 'continuous_num':
             min_val = min(dataset[:, i].astype(np.float64))
             max_val = max(dataset[:, i].astype(np.float64))
             for j in range(size):
+                # Assume that continuous features satisfy normal distribution
                 tmp_data.append(str(random.uniform(min_val, max_val)))
         data_generate.append(np.array(tmp_data))
     return np.array(data_generate).transpose()
 
+
 def one_hot_encoding(data):
+    """
+        One-hot encoding the feature
+        ----------
+        Parameters
+        Data: Dataset column
+        ----------
+        Return
+        The encoded columns
+    """
     encoded_data = []
     value = list(set(data))
     value_cnt = len(value)
@@ -61,7 +102,18 @@ def one_hot_encoding(data):
                 continue
     return encoded_data
 
+
 def normalization(data):
+    """
+        normalize every column of the data
+        ----------
+        Parameters
+        Data: Dataset column
+        ----------
+        Return
+        The normalized dataset
+        Meta data for recovery
+    """
     data_min = min(data)
     data_max = max(data)
     data_mean = np.mean(data)
@@ -73,12 +125,36 @@ def normalization(data):
 
 
 def normalization_reverse(data, info):
+    """
+        Recover normalized data to real data
+        ----------
+        Parameters
+        Data: Dataset column
+        Meta data for recovery
+        ----------
+        Return
+        The real dataset
+    """
     data_max_min = info[0]
     data_mean = info[1]
     data = data * data_max_min + data_mean
     return data
 
+
 def generate_data(data_full, cols):
+    """
+        Split dataset into data and label
+        ----------
+        Parameters
+        dataset: The raw dataset
+        col: The columns we use as label
+        ----------
+        Return
+        data_x: Data
+        data_y: Label
+        feature_type_x: List of feature type of data
+        feature_type_y: List of feature type of label
+    """
     cols = [cols]
     data_y = data_full[:, cols]
     data_x = np.delete(data_full, cols, axis=1)
@@ -98,7 +174,21 @@ def generate_data(data_full, cols):
 
 
 def data_completion(data_x, data_y, f_y, task, regression_model, classification_model, n):
-
+    """
+        Main function of data completion
+        ----------
+        Parameters
+        data_x: Data
+        Data_y: labels
+        f_y: type of labels
+        task: target column
+        regression_model: model used for regression tasks
+        classification_model: model used for classification tasks ,
+        n: size of the real datset
+        ----------
+        Return
+        Predicted label of target column
+    """
     training_data = data_x[:n, :]
     testing_data = data_x[n:,:]
     training_label = data_y[:n, :].transpose()

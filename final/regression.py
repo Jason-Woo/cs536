@@ -10,9 +10,6 @@ class Regression:
         self.y = None
 
     def naive_regression(self, x, y):
-        # gradient_descent set to true to use gradient descent
-        # algebraic solution set to false for algebraic solution
-
         m = x.shape[0]
         n = x.shape[1]
         w = np.zeros(n)
@@ -33,10 +30,7 @@ class Regression:
             iter_cnt += 1
 
     def ridge_regression(self, x, y):
-        # gradient_descent set to true to use gradient descent
-        # algebraic solution set to false for algebraic solution
         m, n = x.shape
-
         w = np.zeros(n)
         iter_cnt = 0
         learning_rate = 0.1
