@@ -14,6 +14,6 @@ class BasicCompletion:
             predict_label = [mode] * len(testing_data)
             return np.array(predict_label)
         elif self.type == 'continuous':
-            mean_val = training_label.mean()
+            mean_val = training_label.astype(np.float64).mean()
             predict_label = [mean_val] * len(testing_data)
             return np.array(predict_label)

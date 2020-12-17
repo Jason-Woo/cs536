@@ -3,7 +3,7 @@ import random
 
 
 class RandomForest:
-    def __init__(self, num_feature, k=10, forest_size=20):
+    def __init__(self, num_feature, k=10, forest_size=40):
         self.num_feature = num_feature
         self.forest_size = forest_size
         self.k = k

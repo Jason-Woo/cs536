@@ -204,11 +204,11 @@ def data_completion(data_x, data_y, f_y, regression_model, classification_model,
 if __name__ == '__main__':
     dataset_path = 'Skyserver_SQL2_27_2018 6_51_39 PM.csv'
     dataset_path1 = 'test.csv'
-    target_col = [3]
+    target_col = [17]
     cross_validation_size = 10
     regression_model_list = ['naive_regression', 'ridge_regression', 'lasso_regression']
     classification_model_list = ['knn', 'decision_tree', 'random_forest']
-    find_best_model = True
+    find_best_model = False
 
     best_regression_model, best_classification_model = None, None
     best_regression_loss, best_classification_acc = 1e20, 0
@@ -241,8 +241,8 @@ if __name__ == '__main__':
             print("Best classification model is ", best_classification_model)
             print("Accuracy = ", best_classification_acc)
     else:
-        regression_model = 'lasso_regression'
-        classification_model = 'random_forest'
+        regression_model = 'basic_completion'
+        classification_model = 'basic_completion'
         status, accuracy = data_completion(x, y, f_y, regression_model, classification_model, cross_validation_size)
         print("-----------------------------------")
         if status[1] == 1:
